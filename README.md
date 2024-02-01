@@ -15,6 +15,3 @@ Morgan
 Nodemon
 mongoose
 and many more
-
-Running on port 3000 (Client) 
-Running on port 5000 (Server)
