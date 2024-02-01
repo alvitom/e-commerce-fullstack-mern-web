@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 
-const cartSchema = new mongoose.Schema({
+const checkoutSchema = new mongoose.Schema({
   userId: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
   items: [
     {
@@ -14,16 +14,15 @@ const cartSchema = new mongoose.Schema({
       price: {
         type: Number,
       },
-      stock: {
-        type: Number,
-      },
       quantity: {
         type: Number,
       },
     },
   ],
+//   total: { type: Number, required: true },
+  //   createdAt: { type: Date, default: Date.now },
 });
 
-const Cart = mongoose.model("carts", cartSchema);
+const Checkout = mongoose.model("checkouts", checkoutSchema);
 
-module.exports = Cart;
+module.exports = Checkout;
