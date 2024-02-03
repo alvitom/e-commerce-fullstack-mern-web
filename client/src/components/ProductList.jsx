@@ -19,11 +19,10 @@ const ProductList = ({ items, products }) => {
                     {product.product_name}
                   </h6>
                   <p className="card-text my-3">Rp. {product.price.toLocaleString()}</p>
-                  <p className="card-text">
-                    <Rating value={product.rating.rate} fractions={2} readOnly className="mx-auto my-2" />
-                    <span>Stok: {product.stock}</span><br />
-                    Terjual: {product.rating.count}
-                  </p>
+                  <Rating value={product.rating.rate} fractions={2} readOnly className="mx-auto my-2" />
+                  <span>Stok: {product.stock}</span>
+                  <br />
+                  Terjual: {product.rating.count}
                 </div>
               </div>
             </a>

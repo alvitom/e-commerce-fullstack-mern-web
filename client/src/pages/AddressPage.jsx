@@ -18,11 +18,13 @@ const AddressPage = ({ userId }) => {
   useEffect(() => {
     const getUserAddress = async () => {
       try {
-        const response = await axios.get(`http://localhost:5000/address/${userId}`);
-        const { address } = response.data;
-        setAddress(address);
-      } catch (error) {
-        // console.error("Gagal melakukan checkout", error.message);
+        if (userId) {
+          const response = await axios.get(`${process.env.REACT_APP_BASEURL}/address/${userId}`);
+          const { address } = response.data;
+          setAddress(address);
+        }
+      } catch (err) {
+        console.error("Gagal mendapatkan alamat", err.message);
       }
     };
 
@@ -33,7 +35,7 @@ const AddressPage = ({ userId }) => {
     e.preventDefault();
 
     try {
-      const response = await axios.post("http://localhost:5000/address/add", {
+      await axios.post(`${process.env.REACT_APP_BASEURL}/address/add`, {
         userId,
         name,
         phone,
@@ -64,17 +66,15 @@ const AddressPage = ({ userId }) => {
                 <div className="p-4 border rounded">
                   <ol>
                     {address.map((item) => (
-                      <>
-                        <li className="mb-4">
-                          <span className="d-block">
-                            <strong>{item.name}</strong> | {item.phone}
-                          </span>
-                          <span className="d-block">{item.detail}</span>
-                          <span className="d-block">
-                            {item.subdistrict}, Kota {item.city}, {item.province}, ID {item.postCode}
-                          </span>
-                        </li>
-                      </>
+                      <li className="mb-4" key={item._id}>
+                        <span className="d-block">
+                          <strong>{item.name}</strong> | {item.phone}
+                        </span>
+                        <span className="d-block">{item.detail}</span>
+                        <span className="d-block">
+                          {item.subdistrict}, Kota {item.city}, {item.province}, ID {item.postCode}
+                        </span>
+                      </li>
                     ))}
                   </ol>
                 </div>

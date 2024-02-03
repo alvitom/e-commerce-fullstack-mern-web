@@ -12,20 +12,22 @@ const CartPage = ({ userId }) => {
   useEffect(() => {
     const getCartItems = async () => {
       try {
-        const response = await axios.get(`http://localhost:5000/cart/${userId}`);
-        const { items } = response.data;
+        if (userId) {
+        const response = await axios.get(`${process.env.REACT_APP_BASEURL}/cart/${userId}`);
+        const { items } = await response.data;
         setCartItems(items);
-      } catch (error) {
-        // console.error("Gagal mendapatkan cart items", error.message);
+        }
+      } catch (err) {
+        console.error("Gagal mendapatkan item keranjang: ", err.message);
       }
     };
 
     getCartItems();
-  }, [userId, cartItems]);
+  }, [userId /* , cartItems */]);
 
   const updateQuantity = async (productId, operation) => {
     try {
-      const response = await axios.post(`http://localhost:5000/cart/${operation}-quantity`, {
+      const response = await axios.post(`${process.env.REACT_APP_BASEURL}/cart/${operation}-quantity`, {
         userId,
         productId,
       });
@@ -63,17 +65,17 @@ const CartPage = ({ userId }) => {
     setSelectAll((prevSelectAll) => !prevSelectAll);
   };
 
-  const calculateTotal = () => {
-    let totalAmount = 0;
-    cartItems.forEach((item) => {
-      if (checkedItems[item.productId]) {
-        totalAmount += item.quantity * item.price;
-      }
-    });
-    setTotal(totalAmount);
-  };
-
   useEffect(() => {
+    const calculateTotal = () => {
+      let totalAmount = 0;
+      cartItems.forEach((item) => {
+        if (checkedItems[item.productId]) {
+          totalAmount += item.quantity * item.price;
+        }
+      });
+      setTotal(totalAmount);
+    };
+
     calculateTotal();
   }, [selectAll, checkedItems, cartItems]);
 
@@ -87,22 +89,22 @@ const CartPage = ({ userId }) => {
     } else {
       initializeCheckedItems(cartItems);
     }
-  }, [selectAll]);
+  }, [selectAll, cartItems]);
 
   const handleDeleteItem = async (itemId) => {
-    const response = await axios.delete(`http://localhost:5000/cart/${userId}/${itemId}`);
+    await axios.delete(`${process.env.REACT_APP_BASEURL}/cart/${userId}/${itemId}`);
   };
 
   const handleCheckout = async () => {
     const selectedItems = cartItems.filter((item) => checkedItems[item.productId]);
 
     try {
-      const response = await axios.post("http://localhost:5000/checkout", {
+      const response = await axios.post(`${process.env.REACT_APP_BASEURL}/checkout`, {
         userId,
         selectedItems,
       });
       setCartItems([]);
-      const checkoutId = response.data._id;
+      const checkoutId = await response.data._id;
       sessionStorage.setItem("checkoutId", checkoutId);
     } catch (error) {
       console.error("Gagal melakukan checkout", error.message);
@@ -139,7 +141,7 @@ const CartPage = ({ userId }) => {
                       <input
                         type="checkbox"
                         className="form-check-input mt-5 border-secondary"
-                        checked={checkedItems[item.productId]}
+                        checked={checkedItems[item.productId] ?? false}
                         onChange={() => handleCheckChange(item.productId)}
                         style={{ width: 22 + "px", height: 22 + "px", cursor: "pointer" }}
                       />
@@ -154,7 +156,7 @@ const CartPage = ({ userId }) => {
                         <button className={item.quantity > 1 ? "btn btn-dark" : "btn btn-dark disabled"} onClick={() => handleDecreaseQuantity(item.productId)}>
                           -
                         </button>
-                        <input type="number" className="form-control w-50 text-center" min={1} max={50} value={item.quantity} allowNegative={false} readOnly />
+                        <input type="number" className="form-control w-50 text-center" min={1} max={50} value={item.quantity} readOnly />
                         <button className={item.quantity !== item.stock ? "btn btn-dark" : "btn btn-dark disabled"} onClick={() => handleIncreaseQuantity(item.productId)}>
                           +
                         </button>

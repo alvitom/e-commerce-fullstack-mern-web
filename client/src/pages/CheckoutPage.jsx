@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Modal, Radio, RadioGroup, px } from "@mantine/core";
+import { Modal, Radio, RadioGroup } from "@mantine/core";
 import HeadElement from "../components/HeadElement";
 import styled from "styled-components";
 import axios from "axios";
@@ -12,20 +12,21 @@ const CheckoutPage = ({ userId }) => {
   const [totalPrice, setTotalPrice] = useState([]);
   const [address, setAddress] = useState([]);
   const [selectedAddress, setSelectedAddress] = useState(null);
-  const [orderId, setOrderId] = useState("");
+  // const [orderId, setOrderId] = useState("");
 
   useEffect(() => {
     const getUserAddress = async () => {
       try {
-        const response = await axios.get(`http://localhost:5000/address/${userId}`);
-        const { address } = response.data;
-        setAddress(address);
-
-        if (address.length > 0) {
-          setSelectedAddress(address[0]._id);
+        if (userId) {
+          const response = await axios.get(`${process.env.REACT_APP_BASEURL}/address/${userId}`);
+          const { address } = response.data;
+          setAddress(address);
+          if (address.length > 0) {
+            setSelectedAddress(address[0]._id);
+          }
         }
       } catch (error) {
-        // console.error("Gagal melakukan checkout", error.message);
+        console.error("Gagal melakukan checkout", error.message);
       }
     };
 
@@ -33,13 +34,15 @@ const CheckoutPage = ({ userId }) => {
 
     const getCheckoutItems = async () => {
       try {
-        const response = await axios.get(`http://localhost:5000/checkout/${userId}`);
-        const data = response.data;
-        setCheckoutItems(data);
-        const totalQuantity = data.reduce((total, value) => total + value.quantity, 0);
-        setTotalQuantity(totalQuantity);
-        const totalPrice = data.reduce((total, value) => total + value.price * value.quantity, 0);
-        setTotalPrice(totalPrice);
+        if (userId) {
+          const response = await axios.get(`${process.env.REACT_APP_BASEURL}/checkout/${userId}`);
+          const data = response.data;
+          setCheckoutItems(data);
+          const totalQuantity = data.reduce((total, value) => total + value.quantity, 0);
+          setTotalQuantity(totalQuantity);
+          const totalPrice = data.reduce((total, value) => total + value.price * value.quantity, 0);
+          setTotalPrice(totalPrice);
+        }
       } catch (error) {
         // console.error("Gagal melakukan checkout", error.message);
       }
@@ -51,7 +54,7 @@ const CheckoutPage = ({ userId }) => {
       const currentCheckoutId = sessionStorage.getItem("checkoutId");
 
       if (currentCheckoutId) {
-        axios.delete(`http://localhost:5000/checkout/${currentCheckoutId}`);
+        axios.delete(`${process.env.REACT_APP_BASEURL}/checkout/${currentCheckoutId}`);
         sessionStorage.removeItem("checkoutId");
       }
     };
@@ -75,19 +78,19 @@ const CheckoutPage = ({ userId }) => {
     });
 
     try {
-      const response = await axios.post("http://localhost:5000/order", {
+      const response = await axios.post(`${process.env.REACT_APP_BASEURL}/order`, {
         userId,
         items: checkoutItems,
         total: totalPrice,
         shippingAddress: newAddress,
       });
-      setOrderId(response.data.latestOrder);
+      // setOrderId(response.data.latestOrder);
       const { token } = response.data;
       window.snap.pay(token, {
         onSuccess: async function (result) {
           window.location.assign("/");
           // try {
-          //   await axios.post(`http://localhost:5000/order/${orderId}/complete-payment`);
+          //   await axios.post(`${process.env.REACT_APP_BASEURL}/order/${orderId}/complete-payment`);
           // } catch (error) {
           //   console.error("Error completing payment:", error);
           // }
@@ -156,7 +159,7 @@ const CheckoutPage = ({ userId }) => {
                   <div className="d-flex flex-column justify-content-center align-items-center">
                     <RadioGroup value={selectedAddress} onChange={(value) => setSelectedAddress(value)}>
                       {address.map((item) => (
-                        <div className="d-flex justify-content-between align-items-center mb-3 border rounded p-3">
+                        <div className="d-flex justify-content-between align-items-center mb-3 border rounded p-3" key={item._id}>
                           <div className="address-container">
                             <span className="d-block">
                               {item.name} | {item.phone}
@@ -180,20 +183,18 @@ const CheckoutPage = ({ userId }) => {
             <div className="text-secondary border-2" style={{ borderStyle: "dashed" }}></div>
             <div className="bg-light border rounded p-3">
               {checkoutItems.map((item) => (
-                <>
-                  <div className={checkoutItems.length === 1 ? "row justify-content-center align-items-center" : "row justify-content-center align-items-center mb-4"}>
-                    <div className="col-2">
-                      <img src={item.image} className="img-fluid" alt={item.name} />
-                    </div>
-                    <div className="col-10 d-flex flex-column">
-                      <p className="fw-bold">{item.name}</p>
-                      <span>Rp. {item.price.toLocaleString()}</span>
-                      <span className="text-end fs-5">
-                        <strong>{item.quantity}x</strong>
-                      </span>
-                    </div>
+                <div className={checkoutItems.length === 1 ? "row justify-content-center align-items-center" : "row justify-content-center align-items-center mb-4"} key={item.id}>
+                  <div className="col-2">
+                    <img src={item.image} className="img-fluid" alt={item.name} />
                   </div>
-                </>
+                  <div className="col-10 d-flex flex-column">
+                    <p className="fw-bold">{item.name}</p>
+                    <span>Rp. {item.price.toLocaleString()}</span>
+                    <span className="text-end fs-5">
+                      <strong>{item.quantity}x</strong>
+                    </span>
+                  </div>
+                </div>
               ))}
             </div>
 

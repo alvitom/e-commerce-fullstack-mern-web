@@ -1,21 +1,7 @@
 const bcrypt = require("bcryptjs");
-const jwt = require("jsonwebtoken");
 const User = require("../models/User");
-
-exports.getAuthInfo = (req, res) => {
-  const token = req.header("Authorization");
-
-  if (!token) {
-    return res.status(401).json({ message: "Token tidak ditemukan" });
-  }
-
-  try {
-    const decoded = jwt.verify(token, "secret-key");
-    res.status(200).json({ userId: decoded.userId });
-  } catch (error) {
-    res.status(401).json({ message: "Token tidak valid" });
-  }
-};
+const Cart = require("../models/Cart");
+const jwt = require("jsonwebtoken");
 
 exports.login = async (req, res) => {
   const { username, password } = req.body;
@@ -33,7 +19,7 @@ exports.login = async (req, res) => {
       return res.status(401).json({ message: "Password salah" });
     }
 
-    const token = jwt.sign({ userId: user._id }, "secret-key", { expiresIn: "7d" });
+    const token = jwt.sign({ user }, "secret-key", { expiresIn: "7d" });
 
     res.status(200).json({ token, userId: user._id });
   } catch (error) {
@@ -59,8 +45,15 @@ exports.register = async (req, res) => {
     // Simpan user ke database
     await newUser.save();
 
+    const cart = new Cart({
+      userId: newUser._id,
+      items: [],
+    });
+
+    await cart.save();
+
     // Buat token JWT
-    const token = jwt.sign({ userId: newUser._id }, "secret-key", { expiresIn: "7d" });
+    const token = jwt.sign({ user: newUser }, "secret-key", { expiresIn: "7d" });
 
     res.status(200).json({ token, userId: newUser._id });
   } catch (error) {

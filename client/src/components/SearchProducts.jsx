@@ -11,7 +11,7 @@ const SearchProducts = () => {
     const handleSearch = async () => {
       if (keyword.length >= 1) {
         try {
-          const response = await axios.get(`http://localhost:5000/products/search?keyword=${keyword}`);
+          const response = await axios.get(`${process.env.REACT_APP_BASEURL}/products/search?keyword=${keyword}`);
           const data = await response.data;
           setProducts(data);
         } catch (error) {

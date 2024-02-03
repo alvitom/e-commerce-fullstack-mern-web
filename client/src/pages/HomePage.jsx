@@ -13,7 +13,7 @@ const HomePage = () => {
         const data = await getProductList("");
         setProducts(data);
       } catch (error) {
-        console.error("Error fetching data:", error);
+        console.error("Gagal mendapatkan daftar produk: ", error.message);
       }
     };
 
@@ -24,7 +24,7 @@ const HomePage = () => {
     <>
       <HeadElement pageTitle="Situs Jual Beli Online Terlengkap, Mudah & Aman | Shophub" />
       <div className="container mt-5">
-      <Carousel />
+        <Carousel />
         <ProductList products={products} />
       </div>
     </>

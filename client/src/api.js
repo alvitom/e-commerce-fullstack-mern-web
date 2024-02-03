@@ -13,7 +13,7 @@ export const getProductList = async (resource) => {
 };
 
 export const authUser = async (resource, username, email, password) => {
-  const response = await axios.post(`${baseUrl}/auth/${resource}`, {
+  const response = await axios.post(`${baseUrl}/user/${resource}`, {
     username,
     email,
     password,

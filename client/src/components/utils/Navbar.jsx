@@ -1,26 +1,24 @@
 import React, { useEffect, useState } from "react";
-import { Navbar as BootstrapNavbar, Nav, Button, Dropdown } from "react-bootstrap";
+import { Dropdown } from "react-bootstrap";
 import brand from "../../images/brand.png";
 import styled from "styled-components";
 import { Indicator, Modal } from "@mantine/core";
 import axios from "axios";
 import SearchProducts from "../SearchProducts";
 
-const Navbar = ({ isLoggedIn, userId }) => {
+const Navbar = ({ isLoggedIn, userId, user }) => {
   const [modalLogout, setModalLogout] = useState(false);
-  const [cartItems, setCartItems] = useState([]);
-
-  const getCartCount = async () => {
-    try {
-      const response = await axios.get(`http://localhost:5000/cart/${userId}`);
-      const { items } = response.data;
-      setCartItems(items);
-    } catch (error) {
-      // console.error("Gagal mendapatkan cart items", error.message);
-    }
-  };
+  const [cartItems, setCartItems] = useState(null);
 
   useEffect(() => {
+    const getCartCount = async () => {
+      if (userId) {
+        const response = await axios.get(`${process.env.REACT_APP_BASEURL}/cart/${userId}`);
+        const { items } = await response.data;
+        setCartItems(items.length);
+      }
+    };
+
     getCartCount();
   }, [userId, cartItems]);
 
@@ -51,9 +49,9 @@ const Navbar = ({ isLoggedIn, userId }) => {
           <div className="collapse navbar-collapse" id="navbarSupportedContent">
             <ul className="navbar-nav me-auto mb-2 mb-lg-0">
               <Li className="nav-item dropdown">
-                <a className="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                <button className="nav-link dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
                   Kategori
-                </a>
+                </button>
                 <ul className="dropdown-menu">
                   <li>
                     <a className="dropdown-item" href={`/products/category/Pakaian Pria`}>
@@ -82,8 +80,8 @@ const Navbar = ({ isLoggedIn, userId }) => {
             <SearchProducts />
 
             <button className="btn btn-outline-light me-5" onClick={handleCart}>
-              {cartItems.length !== 0 ? (
-                <Indicator position="top-end" label={cartItems.length} size={25} offset={-9}>
+              {cartItems > 0 ? (
+                <Indicator position="top-end" label={cartItems} size={25} offset={-9}>
                   <i className="bi bi-bag-fill"></i>
                 </Indicator>
               ) : (
@@ -93,7 +91,7 @@ const Navbar = ({ isLoggedIn, userId }) => {
             {isLoggedIn ? (
               <Dropdown className="d-flex">
                 <Dropdown.Toggle variant="outline-light" id="dropdown-basic">
-                  Akun Saya
+                  {user.username}
                 </Dropdown.Toggle>
                 <Dropdown.Menu>
                   <Dropdown.Item href="#/action-1">Profil</Dropdown.Item>

@@ -23,7 +23,7 @@ const CategoryPage = () => {
         const data = await getProductList(`category/${productCategory}`);
         setProducts(data);
       } catch (error) {
-        console.error("Error fetching data:", error);
+        console.error("Gagal mendapatkan daftar produk berdasarkan category: ", error.message);
       }
     };
 

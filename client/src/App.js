@@ -1,5 +1,8 @@
 import React, { useEffect, useState } from "react";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import "bootstrap/dist/css/bootstrap.min.css";
+import "bootstrap/dist/js/bootstrap.bundle.min.js";
+import "bootstrap-icons/font/bootstrap-icons.css";
+import { Routes, Route } from "react-router-dom";
 import CartPage from "./pages/CartPage";
 import SignUp from "./pages/Register";
 import { MantineProvider, createTheme } from "@mantine/core";
@@ -21,21 +24,22 @@ const App = () => {
 
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userId, setUserId] = useState(null);
+  const [user, setUser] = useState(null);
 
   const checkAuth = async () => {
     try {
       const token = localStorage.getItem("token");
-
       if (token) {
-        const response = await axios.get("http://localhost:5000/auth/check-auth", {
+        const response = await axios.get(`${process.env.REACT_APP_BASEURL}/auth`, {
           headers: { Authorization: token },
         });
-        const { userId } = response.data;
+        const { user } = await response.data;
         setIsLoggedIn(true);
-        setUserId(userId);
+        setUserId(user._id);
+        setUser(user);
       }
-    } catch (error) {
-      // console.error("Gagal memeriksa otentikasi", error.message);
+    } catch (err) {
+      console.error("Gagal mendapatkan otentikasi: ", err.message);
     }
   };
 
@@ -44,31 +48,24 @@ const App = () => {
   }, [userId]);
 
   useEffect(() => {
-    // You can also change below url value to any script url you wish to load, 
-    // for example this is snap.js for Sandbox Env (Note: remove `.sandbox` from url if you want to use production version)
-    const midtransScriptUrl = 'https://app.sandbox.midtrans.com/snap/snap.js';  
-  
-    let scriptTag = document.createElement('script');
+    const midtransScriptUrl = "https://app.sandbox.midtrans.com/snap/snap.js";
+
+    let scriptTag = document.createElement("script");
     scriptTag.src = midtransScriptUrl;
-  
-    // Optional: set script attribute, for example snap.js have data-client-key attribute 
-    // (change the value according to your client-key)
-    const myMidtransClientKey = 'SB-Mid-client-nZ60v6I3H2Ctvei1';
-    scriptTag.setAttribute('data-client-key', myMidtransClientKey);
-  
+
+    const myMidtransClientKey = process.env.MIDTRANS_CLIENT_KEY;
+    scriptTag.setAttribute("data-client-key", myMidtransClientKey);
+
     document.body.appendChild(scriptTag);
-  
+
     return () => {
       document.body.removeChild(scriptTag);
-    }
+    };
   }, []);
-  
-  // Then somewhere else on your React component, `window.snap` global object will be available to use
-  // e.g. you can then call `window.snap.pay( ... )` function.
 
   return (
     <MantineProvider theme={theme}>
-      {window.location.pathname !== "/login" && window.location.pathname !== "/register" ? <Navbar isLoggedIn={isLoggedIn} userId={userId} /> : null}
+      {window.location.pathname !== "/login" && window.location.pathname !== "/register" ? <Navbar isLoggedIn={isLoggedIn} userId={userId} user={user} /> : null}
       <Routes>
         <Route exact path="/" element={<HomePage />} />
         <Route exact path="/products/category/:productCategory" element={<CategoryPage />} />

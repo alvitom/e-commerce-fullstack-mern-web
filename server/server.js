@@ -1,16 +1,18 @@
-const app = require('./config/server');
+const app = require("./config/server");
 const db = require("./config/database");
 const productRoutes = require("./routes/product");
-const authRoutes = require("./routes/auth");
+const userRoutes = require("./routes/user");
 const cartRoutes = require("./routes/cart");
 const checkoutRoutes = require("./routes/checkout");
 const addressRoutes = require("./routes/address");
 const orderRoutes = require("./routes/order");
-const errorHandler = require('./utils/errorHandler');
+const errorHandler = require("./utils/errorHandler");
+const authenticate = require("./middleware/auth");
 
+app.get("/auth", authenticate);
 
 app.use("/products", productRoutes);
-app.use("/auth", authRoutes);
+app.use("/user", userRoutes);
 app.use("/cart", cartRoutes);
 app.use("/checkout", checkoutRoutes);
 app.use("/address", addressRoutes);

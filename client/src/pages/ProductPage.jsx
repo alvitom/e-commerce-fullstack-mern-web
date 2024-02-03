@@ -17,7 +17,7 @@ const ProductPage = ({ isLoggedIn, userId }) => {
         const data = await getProductList(productId);
         setProduct(data);
       } catch (error) {
-        console.error("Error fetching data:", error);
+        console.error("Gagal mendapatkan detail produk: ", error.message);
       }
     };
 
@@ -27,7 +27,7 @@ const ProductPage = ({ isLoggedIn, userId }) => {
   const handleCheckout = async () => {
     if (isLoggedIn) {
       try {
-        const response = await axios.post("http://localhost:5000/checkout", {
+        const response = await axios.post(`${process.env.REACT_APP_BASEURL}/checkout`, {
           userId,
           productId: product._id,
           productImage: product.image,
@@ -38,7 +38,7 @@ const ProductPage = ({ isLoggedIn, userId }) => {
         const checkoutId = response.data._id;
         sessionStorage.setItem("checkoutId", checkoutId);
       } catch (error) {
-        console.error("Gagal melakukan checkout", error.message);
+        console.error("Gagal melakukan checkout: ", error.message);
       }
       window.location.assign("/my/checkout");
     } else {
@@ -49,7 +49,7 @@ const ProductPage = ({ isLoggedIn, userId }) => {
   const handleAddToCart = async () => {
     if (isLoggedIn) {
       try {
-        const response = await axios.post("http://localhost:5000/cart/add", {
+        await axios.post(`${process.env.REACT_APP_BASEURL}/cart/add`, {
           userId,
           productId: product._id,
           productImage: product.image,
@@ -64,7 +64,7 @@ const ProductPage = ({ isLoggedIn, userId }) => {
           setNotification(false);
         }, 3000);
       } catch (error) {
-        console.error("Gagal menambahkan ke keranjang", error.message);
+        console.error("Gagal menambahkan ke keranjang: ", error.message);
       }
     } else {
       window.location.assign("/login");
@@ -80,7 +80,7 @@ const ProductPage = ({ isLoggedIn, userId }) => {
       <HeadElement pageTitle={product.product_name} />
       <div className="container" style={{ height: px(1100) }}>
         {notification ? (
-          <Notification withCloseButton={false} withBorder title="Produk berhasil ditambahkan ke keranjang" mt="md" icon={<i class="bi bi-check-lg"></i>} color="teal" radius="md" className="w-25 mx-auto"></Notification>
+          <Notification withCloseButton={false} withBorder title="Produk berhasil ditambahkan ke keranjang" mt="md" icon={<i className="bi bi-check-lg"></i>} color="teal" radius="md" className="w-25 mx-auto"></Notification>
         ) : null}
         <div className="row d-flex justify-content-center">
           <div className="col-md-3 mt-3 ">
